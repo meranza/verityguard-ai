@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VerityGuard provides explainable six-label abusive language detection powered by a validated BERT checkpoint.">
+  <title>VerityGuard — Language moderation with context</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js" defer></script>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="VerityGuard home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>VerityGuard</span>
+      </a>
+      <div class="nav-links">
+        <a href="#capabilities">Capabilities</a>
+        <a href="#method">Method</a>
+        <a href="#responsibility">Responsibility</a>
+      </div>
+      <a class="nav-action" href="#analyzer">Open analyzer</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero page-shell">
+      <div class="hero-copy" data-reveal>
+        <p class="brand-line">Language intelligence for human decisions</p>
+        <h1>Moderation needs context.</h1>
+        <p class="hero-lede">Analyze harmful language across six distinct risk signals. Clear probabilities, honest uncertainty, and no mystery labels.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#analyzer">Analyze language</a>
+          <a class="button button-secondary" href="#method">See how it works</a>
+        </div>
+      </div>
+
+      <div class="analyzer-wrap" id="analyzer" data-reveal>
+        <div class="visual-window" aria-hidden="true">
+          <img src="https://picsum.photos/seed/moderation-signal/1200/900" alt="">
+          <div class="visual-scan"></div>
+          <span>Signal / language / context</span>
+        </div>
+        <form class="analyzer" id="analysis-form">
+          <div class="analyzer-heading">
+            <div>
+              <p>Live analysis</p>
+              <h2>Inspect a comment</h2>
+            </div>
+            <span class="status-light"><i></i> Ready</span>
+          </div>
+          <label for="comment">Text to analyze</label>
+          <textarea id="comment" name="comment" maxlength="{{ max_text_length }}" rows="6" placeholder="Paste a comment, message, or short passage here…" required></textarea>
+          <div class="input-meta">
+            <span>Your text is processed only for this request.</span>
+            <span id="character-count">0 / {{ max_text_length }}</span>
+          </div>
+          <div class="sample-row" aria-label="Example comments">
+            <button type="button" data-sample="Thank you for sharing your perspective. I disagree, but I understand your point.">Respectful</button>
+            <button type="button" data-sample="You are completely useless and nobody wants you here.">Insult</button>
+            <button type="button" data-sample="I am going to kill you.">Threat</button>
+          </div>
+          <button class="analyze-button" type="submit">
+            <span>Run six-signal analysis</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <p class="form-error" id="form-error" role="alert"></p>
+        </form>
+
+        <section class="results" id="results" aria-live="polite" aria-hidden="true" hidden>
+          <div class="result-summary">
+            <div>
+              <p>Assessment</p>
+              <h2 id="verdict-title">Ready for analysis</h2>
+            </div>
+            <div class="risk-dial" id="risk-dial" style="--risk: 0">
+              <span id="risk-score">0%</span>
+            </div>
+          </div>
+          <p class="result-explanation" id="result-explanation"></p>
+          <div class="score-list">
+            {% for key, label in labels.items() %}
+            <div class="score-row" data-label="{{ key }}">
+              <div class="score-copy">
+                <span>{{ label.name }}</span>
+                <strong>0.0%</strong>
+              </div>
+              <div class="score-track"><i></i></div>
+            </div>
+            {% endfor %}
+          </div>
+          <button class="reset-button" id="reset-analysis" type="button">Analyze another comment</button>
+        </section>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>Toxic language</span><i></i><span>Severe toxicity</span><i></i><span>Obscene content</span><i></i><span>Threats</span><i></i><span>Insults</span><i></i><span>Identity hate</span><i></i>
+        <span>Toxic language</span><i></i><span>Severe toxicity</span><i></i><span>Obscene content</span><i></i><span>Threats</span><i></i><span>Insults</span><i></i><span>Identity hate</span><i></i>
+      </div>
+    </div>
+
+    <section class="capabilities page-shell" id="capabilities">
+      <div class="section-heading" data-reveal>
+        <h2>One comment. Six independent signals.</h2>
+        <p>A multi-label problem deserves a multi-label model. Every score answers a different moderation question.</p>
+      </div>
+      <div class="bento-grid">
+        <article class="bento-card bento-primary" data-reveal>
+          <div class="card-index">Model contract</div>
+          <h3>Every output is named, mapped, and validated.</h3>
+          <p>The server refuses incompatible checkpoints instead of silently attaching the wrong meaning to a probability.</p>
+          <div class="label-orbit" aria-hidden="true">
+            <span>toxic</span><span>threat</span><span>insult</span><span>obscene</span><span>identity</span><span>severe</span>
+            <div class="orbit-core">6</div>
+          </div>
+        </article>
+        <article class="bento-card bento-code" data-reveal>
+          <div class="card-index">Independent probabilities</div>
+          <h3>Sigmoid, not softmax.</h3>
+          <p>A comment can be both insulting and obscene. Scores never compete for a single category.</p>
+          <code>scores = sigmoid(logits)</code>
+        </article>
+        <article class="bento-card bento-human" data-reveal>
+          <div class="card-index">Human in the loop</div>
+          <h3>Flag first. Decide with context.</h3>
+          <p>VerityGuard is a screening instrument—not an automatic judge.</p>
+          <div class="human-line"><span>Model signal</span><i></i><span>Moderator decision</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="method page-shell" id="method">
+      <div class="method-intro">
+        <p>Built to fail clearly</p>
+        <h2>From raw text to reviewable evidence.</h2>
+        <p>The inference path is intentionally legible. Each stage has one responsibility and one explicit contract.</p>
+      </div>
+      <div class="method-steps" role="list">
+        <article class="method-step is-active" role="listitem">
+          <button type="button" aria-expanded="true">
+            <span>Normalize</span>
+            <strong>Clean input without rewriting meaning</strong>
+          </button>
+          <div class="method-detail">
+            <p>Whitespace is normalized while the original language and punctuation remain available to the tokenizer.</p>
+            <div class="method-visual visual-normalize" aria-hidden="true"><i></i><i></i><i></i></div>
+          </div>
+        </article>
+        <article class="method-step" role="listitem">
+          <button type="button" aria-expanded="false">
+            <span>Encode</span>
+            <strong>Tokenize with a bounded context window</strong>
+          </button>
+          <div class="method-detail">
+            <p>The same tokenizer as the checkpoint converts language into model-ready tensors with explicit truncation.</p>
+            <div class="method-visual visual-encode" aria-hidden="true"><span>CLS</span><span>you</span><span>are</span><span>...</span></div>
+          </div>
+        </article>
+        <article class="method-step" role="listitem">
+          <button type="button" aria-expanded="false">
+            <span>Score</span>
+            <strong>Evaluate every label independently</strong>
+          </button>
+          <div class="method-detail">
+            <p>Six logits pass through sigmoid. The API preserves canonical ordering regardless of checkpoint metadata order.</p>
+            <div class="method-visual visual-score" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </article>
+        <article class="method-step" role="listitem">
+          <button type="button" aria-expanded="false">
+            <span>Review</span>
+            <strong>Translate risk into a human next step</strong>
+          </button>
+          <div class="method-detail">
+            <p>Thresholds produce a review signal, while all probabilities remain visible for contextual judgment.</p>
+            <div class="method-visual visual-review" aria-hidden="true"><span>Signal</span><span>Context</span><span>Decision</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="manifesto page-shell" id="responsibility">
+      <p class="manifesto-copy" data-split-text>Language models can surface patterns, not intent. The final decision belongs to people who understand the conversation.</p>
+      <div class="manifesto-note">
+        <span class="inline-image" aria-hidden="true"></span>
+        <p>Bias-aware by design</p>
+        <p>Identity terms, reclaimed language, humor, and quotation can produce false positives. Use scores as evidence, never as a verdict without review.</p>
+      </div>
+    </section>
+
+    <section class="final-cta page-shell">
+      <div class="cta-panel" data-reveal>
+        <p>See the signals. Keep the judgment human.</p>
+        <h2>Read between the labels.</h2>
+        <a class="button button-primary" href="#analyzer">Start an analysis</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer page-shell">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><span></span></span><span>VerityGuard</span></a>
+    <p>Research-grade signals for responsible moderation.</p>
+    <div>
+      <a href="https://github.com/meranza/verityguard-ai">Source</a>
+      <a href="/health">Health</a>
+      <span>Model: {{ model_name }}</span>
+    </div>
+  </footer>
+</body>
+</html>
