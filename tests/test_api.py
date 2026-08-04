@@ -4,8 +4,9 @@ from app.classifier import LABELS
 def test_homepage_renders(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Moderation needs context" in response.data
-    assert b"Analyze language" in response.data
+    assert b"Abusive language detection" in response.data
+    assert b"Analyze comment" in response.data
+    assert b"Label probabilities" in response.data
 
 
 def test_health_reports_model_state(client):
